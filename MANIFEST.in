@@ -1,0 +1,5 @@
+include mango.py
+include setup.py
+include README.rst
+include LICENSE.txt
+include test/*.py
