@@ -6,7 +6,7 @@ Copyright (c) 2013, Wladston Viana.
 """
 
 __author__ = 'Wladston Viana'
-__version__ = '0.1.7'
+__version__ = '0.1.9'
 __license__ = 'MIT'
 
 # Python.
@@ -78,7 +78,10 @@ class _ModelManipulator(SONManipulator):
             return son
 
 
-class ValidationError(Exception):
+class MangaException(Exception):
+    pass
+
+class ValidationError(MangaException):
     def __init__(self, cls, attr, val):
         self.cls = cls
         self.attr = attr
@@ -86,6 +89,16 @@ class ValidationError(Exception):
 
     def __str__(self):
         return "%s: trying to set %s <- %s" % (self.cls, self.attr, self.val)
+
+class DeserializationError(MangaException):
+    def __init__(self, field, val):
+        self.fld = field
+        self.val = val
+
+    def __str__(self):
+        msg = "Can't deserialize value for field %s: %s"
+
+        return "Can't deserialize field %s with %s" % (self.fld, self.val)
 
 
 class ModelType(type):
@@ -280,6 +293,9 @@ class ListField(Field):
             return value
 
     def to_python(self, value):
+        if not isinstance(value, list):
+            raise DeserializationError(self, value)
+
         if self.field:
             return [self.field.to_python(v) for v in value]
 

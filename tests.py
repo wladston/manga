@@ -8,8 +8,8 @@ import unittest
 
 import manga
 from manga import (Document, Model, TimeStampedModel, ValidationError,
-                   Field, StringField, EmailField, DateTimeField, DictField,
-                   DocumentField, ListField,UTC)
+                   DeserializationError, Field, StringField, EmailField,
+                   DateTimeField, DictField, DocumentField, ListField,UTC)
 
 
 db = manga.setup('_testsuite')
@@ -401,6 +401,14 @@ class DBTest(unittest.TestCase):
 
         self.assertEqual(x.l1[1].field1, '2')
 
+    def test_deserialization_error(self):
+        class TestListField2(Model):
+            l3 = ListField()
+
+        db.testlistfield2.insert({'l3': 'not a list'})
+
+        with self.assertRaises(DeserializationError):
+            TestListField2.find_one()
 
 if __name__ == '__main__':
     unittest.main()
