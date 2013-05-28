@@ -6,7 +6,7 @@ Copyright (c) 2013, Wladston Viana.
 """
 
 __author__ = 'Wladston Viana'
-__version__ = '0.1.5'
+__version__ = '0.1.6'
 __license__ = 'MIT'
 
 # Python.
@@ -130,7 +130,7 @@ class ModelType(type):
 
         rich_cls = super(ModelType, cls).__new__(cls, name, bases, dct)
 
-        if rich_cls.__name__ not in ['Model', 'Document', 'TimeStampedModel']:
+        if any([x.__name__ == 'Model' for x in bases]):
             if db:
                 db.add_son_manipulator(_ModelManipulator(rich_cls))
 
@@ -256,6 +256,36 @@ class DocumentField(Field):
     def to_python(self, value):
         return self.document_class(son=value)
 
+class ListField(Field):
+    def __init__(self, default=None, field=None, **kwargs):
+        default = default or []
+
+        super(ListField, self).__init__(default, **kwargs)
+
+        self.field = field
+
+    def validate(self, value):
+        assert isinstance(value, list)
+
+        if not self.blank:
+            assert value
+
+        [self.field.validate(v) for v in value if self.field]
+
+    def to_storage(self, value):
+        if self.field:
+            return [self.field.to_storage(v) for v in value]
+
+        else:
+            return value
+
+    def to_python(self, value):
+        if self.field:
+            return [self.field.to_python(v) for v in value]
+
+        else:
+            return value
+
 
 class Document(object, metaclass=ModelType):
     '''
@@ -297,7 +327,8 @@ class Document(object, metaclass=ModelType):
 
         for fieldname, fieldinstance in fields:
             try:
-                fieldinstance.validate(self._data[fieldname])
+                python_val = fieldinstance.to_python(self._data[fieldname])
+                fieldinstance.validate(python_val)
 
             except AssertionError:
                 val = self._data[fieldname]

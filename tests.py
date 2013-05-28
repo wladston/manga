@@ -7,9 +7,9 @@ from datetime import datetime, timedelta
 import unittest
 
 import manga
-from manga import Document, Model, TimeStampedModel, ValidationError
-from manga import Field, StringField, EmailField, DateTimeField, DictField
-from manga import DocumentField, UTC
+from manga import (Document, Model, TimeStampedModel, ValidationError,
+                   Field, StringField, EmailField, DateTimeField, DictField,
+                   DocumentField, ListField,UTC)
 
 
 db = manga.setup('_testsuite')
@@ -346,6 +346,10 @@ class DBTest(unittest.TestCase):
         doc.field1 = 'asdf'
         x.doc = doc
 
+        x.save()
+
+        x = TestDocField().find_one()
+
         self.assertIsInstance(x.doc, TestDocument)
 
         self.assertEqual(x.doc.field1, 'asdf')
@@ -356,6 +360,42 @@ class DBTest(unittest.TestCase):
 
         self.assertIsNotNone(TSM().created)
         self.assertIsNotNone(TSM().modified)
+
+    def test_list_field(self):
+        class TestDocument(Document):
+            field1 = StringField()
+
+        class TestListField(Model):
+            l1 = ListField(field=DocumentField(document=TestDocument))
+            l2 = ListField(field=StringField())
+            l3 = ListField()
+
+        x = TestListField()
+
+        with self.assertRaises(ValidationError):
+            x.save()
+
+        with self.assertRaises(ValidationError):
+            x.l3 = '1234'
+
+        x.l3 = ['1234', 3.14, {'hey': 'there'}]
+
+        with self.assertRaises(ValidationError):
+            x.l2 = ['1234', 3.14, {'hey': 'there'}]
+
+        x.l2 = ['1234', '3.14', 'hey there']
+
+        with self.assertRaises(ValidationError):
+            x.l1 = ['1234']
+
+        x.l1 = [TestDocument({'field1': '1'}), TestDocument({'field1': '2'})]
+
+        x.save()
+
+        x = TestListField().find_one()
+
+        self.assertEqual(x.l1[1].field1, '2')
+
 
 if __name__ == '__main__':
     unittest.main()
