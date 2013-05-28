@@ -141,6 +141,11 @@ class DBTest(unittest.TestCase):
         self.assertEqual(b._collection, 'b')
         self.assertEqual(c._collection, 'c')
 
+        c.save()
+        c = C.find_one()
+
+        self.assertEqual(c.fc, [10])
+
     def test_blank(self):
         class TestBlank(Model):
             bl = Field(blank=True)

@@ -6,7 +6,7 @@ Copyright (c) 2013, Wladston Viana.
 """
 
 __author__ = 'Wladston Viana'
-__version__ = '0.1.6'
+__version__ = '0.1.7'
 __license__ = 'MIT'
 
 # Python.
@@ -130,7 +130,7 @@ class ModelType(type):
 
         rich_cls = super(ModelType, cls).__new__(cls, name, bases, dct)
 
-        if any([x.__name__ == 'Model' for x in bases]):
+        if any([hasattr(x, 'save') for x in bases]):
             if db:
                 db.add_son_manipulator(_ModelManipulator(rich_cls))
 
