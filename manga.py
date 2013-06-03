@@ -6,7 +6,7 @@ Copyright (c) 2013, Wladston Viana.
 """
 
 __author__ = 'Wladston Viana'
-__version__ = '0.1.9'
+__version__ = '0.1.11'
 __license__ = 'MIT'
 
 # Python.
@@ -34,7 +34,7 @@ def setup(database_name):
     connection = MongoClient('localhost', 27017, tz_aware=True)
     db = getattr(connection, database_name)
 
-    for  x in _manipulators:
+    for x in _manipulators:
         db.add_son_manipulator(x)
 
     return db
