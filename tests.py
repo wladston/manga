@@ -6,10 +6,14 @@ from datetime import datetime, timedelta
 # Python Libs.
 import unittest
 
+# Pymongo.
+from bson.objectid import ObjectId
+
 import manga
 from manga import (Document, Model, TimeStampedModel, ValidationError,
-                   DeserializationError, Field, StringField, EmailField,
-                   DateTimeField, DictField, DocumentField, ListField,UTC)
+                   DeserializationError, Field, ObjectIdField, StringField,
+                   EmailField, DateTimeField, DictField, DocumentField,
+                   ListField, UTC)
 
 
 db = manga.setup('_testsuite')
@@ -213,6 +217,26 @@ class DBTest(unittest.TestCase):
         self.assertEqual(y.nb1.imaginary, 4.521)
         self.assertEqual(y.nb2.real, 1)
         self.assertEqual(y.nb2.imaginary, 0.13)
+
+    def test_objectid_field(self):
+        class TestObjectId(Model):
+            s1 = ObjectIdField()
+
+        x = TestObjectId()
+
+        with self.assertRaises(ValidationError):
+            x.s1 = 'some value'
+
+        x.s1 = ObjectId('51a61e45d2eee6374abe8653')
+
+        expected = {'_id': None, 's1': ObjectId('51a61e45d2eee6374abe8653')}
+        self.assertEqual(x._data, expected)
+
+        x.save()
+
+        y = TestObjectId.find_one()
+
+        self.assertEqual(y.s1, ObjectId('51a61e45d2eee6374abe8653'))
 
     def test_string_field(self):
         class TestString(Model):

@@ -6,7 +6,7 @@ Copyright (c) 2013, Wladston Viana.
 """
 
 __author__ = 'Wladston Viana'
-__version__ = '0.1.11'
+__version__ = '0.1.12'
 __license__ = 'MIT'
 
 # Python.
@@ -16,6 +16,7 @@ from datetime import datetime, timedelta, tzinfo
 # Pymongo.
 from pymongo import MongoClient
 from pymongo.son_manipulator import SONManipulator
+from bson.objectid import ObjectId
 
 connection = None
 db = None
@@ -175,6 +176,12 @@ class Field(object):
     def to_python(value):
         return value
 
+class ObjectIdField(Field):
+    def validate(self, value):
+        assert isinstance(value, ObjectId)
+
+        if not self.blank:
+            assert value
 
 class StringField(Field):
     def __init__(self, default='', length=None, **kwargs):
