@@ -6,7 +6,7 @@ Copyright (c) 2013, Wladston Viana.
 """
 
 __author__ = 'Wladston Viana'
-__version__ = '0.1.12'
+__version__ = '0.1.13'
 __license__ = 'MIT'
 
 # Python.
@@ -374,6 +374,11 @@ class Model(Document, metaclass=ModelType):
     @classmethod
     def find_one(cls, *args, **kwargs):
         return db[cls._collection].find_one(*args, **kwargs)
+
+    @classmethod
+    def remove(cls, *args, **kwargs):
+        return db[cls._collection].remove(*args, **kwargs)
+
 
     def delete(self):
         if self._id:
