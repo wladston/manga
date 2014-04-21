@@ -220,7 +220,7 @@ class EmailField(StringField):
 
 class DateTimeField(Field):
     def __init__(self, default=None, blank=False, auto=None, **kwargs):
-        super(DateTimeField, self).__init__(default, **kwargs)
+        super(DateTimeField, self).__init__(default, blank, **kwargs)
 
         self.auto = auto
 
